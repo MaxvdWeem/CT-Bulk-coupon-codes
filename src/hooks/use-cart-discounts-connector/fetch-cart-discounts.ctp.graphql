@@ -1,0 +1,17 @@
+query FetchCartDiscounts($limit: Int!, $offset: Int!, $where: String) {
+  cartDiscounts(limit: $limit, offset: $offset, where: $where) {
+    total
+    count
+    offset
+    results {
+      id
+      key
+      nameAllLocales {
+        locale
+        value
+      }
+      cartPredicate
+      requiresDiscountCode
+    }
+  }
+}
