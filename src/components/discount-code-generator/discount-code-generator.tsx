@@ -69,6 +69,9 @@ const DiscountCodeGenerator = () => {
   const shouldFetchCartDiscounts = currentStep === 'cart-discounts';
   const { cartDiscounts, loading: cartDiscountsLoading, error: cartDiscountsError } = useCartDiscountsFetcher(shouldFetchCartDiscounts);
 
+  // Debug log to verify component renders
+  console.log('DiscountCodeGenerator rendered, step:', currentStep);
+
   // Step 1: Configure discount codes
   const [quantity, setQuantity] = useState('10');
   const [totalCharacters, setTotalCharacters] = useState('13');

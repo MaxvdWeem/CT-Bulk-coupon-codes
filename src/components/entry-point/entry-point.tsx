@@ -1,8 +1,9 @@
-import { lazy } from 'react';
+import { lazy, Suspense } from 'react';
 import {
   CustomViewShell,
   setupGlobalErrorListener,
 } from '@commercetools-frontend/application-shell';
+import LoadingSpinner from '@commercetools-uikit/loading-spinner';
 import loadMessages from '../../load-messages';
 
 // Here we split up the main (app) bundle with the actual application business logic.
@@ -16,11 +17,16 @@ const AsyncApplicationRoutes = lazy(
 // in order to catch possible errors on rendering/mounting.
 setupGlobalErrorListener();
 
-const EntryPoint = () => (
-  <CustomViewShell applicationMessages={loadMessages}>
-    <AsyncApplicationRoutes />
-  </CustomViewShell>
-);
+const EntryPoint = () => {
+  console.log('EntryPoint rendering');
+  return (
+    <CustomViewShell applicationMessages={loadMessages}>
+      <Suspense fallback={<LoadingSpinner />}>
+        <AsyncApplicationRoutes />
+      </Suspense>
+    </CustomViewShell>
+  );
+};
 
 EntryPoint.displayName = 'EntryPoint';
 
