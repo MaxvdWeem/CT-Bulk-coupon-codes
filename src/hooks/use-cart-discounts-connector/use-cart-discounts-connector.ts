@@ -29,13 +29,13 @@ type TFetchCartDiscountsQueryVariables = {
   where?: string;
 };
 
-type TUseCartDiscountsFetcher = () => {
+type TUseCartDiscountsFetcher = (shouldFetch?: boolean) => {
   cartDiscounts: TCartDiscount[];
   error?: ApolloError;
   loading: boolean;
 };
 
-export const useCartDiscountsFetcher: TUseCartDiscountsFetcher = () => {
+export const useCartDiscountsFetcher: TUseCartDiscountsFetcher = (shouldFetch = true) => {
   const { data, error, loading } = useMcQuery<
     TFetchCartDiscountsQuery,
     TFetchCartDiscountsQueryVariables
@@ -48,6 +48,7 @@ export const useCartDiscountsFetcher: TUseCartDiscountsFetcher = () => {
     context: {
       target: GRAPHQL_TARGETS.COMMERCETOOLS_PLATFORM,
     },
+    skip: !shouldFetch,
   });
 
   return {

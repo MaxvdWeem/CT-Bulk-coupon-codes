@@ -65,8 +65,9 @@ const DiscountCodeGenerator = () => {
   );
   const [currentStep, setCurrentStep] = useState<Step>('configure');
 
-  // Fetch cart discounts
-  const { cartDiscounts, loading: cartDiscountsLoading, error: cartDiscountsError } = useCartDiscountsFetcher();
+  // Fetch cart discounts - only when needed
+  const shouldFetchCartDiscounts = currentStep === 'cart-discounts';
+  const { cartDiscounts, loading: cartDiscountsLoading, error: cartDiscountsError } = useCartDiscountsFetcher(shouldFetchCartDiscounts);
 
   // Step 1: Configure discount codes
   const [quantity, setQuantity] = useState('10');
