@@ -21,7 +21,7 @@ const config = {
   typeSettings: {
     size: 'LARGE',
   },
-  locators: ['discounts.discount_codes.list'],
+  locators: ['discounts.generate_discount_codes'],
 };
 
 export default config;
