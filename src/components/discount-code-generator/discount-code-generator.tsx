@@ -56,6 +56,17 @@ const previewColumns = [
 ];
 
 const DiscountCodeGenerator = () => {
+  console.log('DiscountCodeGenerator START');
+
+  // Return minimal test UI first
+  return (
+    <Spacings.Stack scale="xl">
+      <Text.Headline as="h1">TEST: Component is rendering!</Text.Headline>
+      <Text.Body>If you see this, the basic component works.</Text.Body>
+    </Spacings.Stack>
+  );
+
+  /* COMMENTED OUT FOR TESTING
   const intl = useIntl();
   const { dataLocale, projectLanguages } = useCustomViewContext(
     (context) => ({
@@ -589,6 +600,7 @@ const DiscountCodeGenerator = () => {
       </Constraints.Horizontal>
     </Spacings.Stack>
   );
+  */
 };
 
 DiscountCodeGenerator.displayName = 'DiscountCodeGenerator';
