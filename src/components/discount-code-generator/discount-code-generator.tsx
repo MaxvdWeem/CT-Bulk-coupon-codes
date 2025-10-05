@@ -56,17 +56,6 @@ const previewColumns = [
 ];
 
 const DiscountCodeGenerator = () => {
-  console.log('DiscountCodeGenerator START');
-
-  // Return minimal test UI first
-  return (
-    <Spacings.Stack scale="xl">
-      <Text.Headline as="h1">TEST: Component is rendering!</Text.Headline>
-      <Text.Body>If you see this, the basic component works.</Text.Body>
-    </Spacings.Stack>
-  );
-
-  /* COMMENTED OUT FOR TESTING
   const intl = useIntl();
   const { dataLocale, projectLanguages } = useCustomViewContext(
     (context) => ({
@@ -79,9 +68,6 @@ const DiscountCodeGenerator = () => {
   // Fetch cart discounts - only when needed
   const shouldFetchCartDiscounts = currentStep === 'cart-discounts';
   const { cartDiscounts, loading: cartDiscountsLoading, error: cartDiscountsError } = useCartDiscountsFetcher(shouldFetchCartDiscounts);
-
-  // Debug log to verify component renders
-  console.log('DiscountCodeGenerator rendered, step:', currentStep);
 
   // Step 1: Configure discount codes
   const [quantity, setQuantity] = useState('10');
@@ -600,7 +586,6 @@ const DiscountCodeGenerator = () => {
       </Constraints.Horizontal>
     </Spacings.Stack>
   );
-  */
 };
 
 DiscountCodeGenerator.displayName = 'DiscountCodeGenerator';
