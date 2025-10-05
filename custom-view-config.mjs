@@ -9,8 +9,8 @@ const config = {
       initialProjectKey: 'ms-schippers',
     },
     production: {
-      customViewId: 'cmgcec5c00004zb01rj11t0ge',
-      url: 'https://ct-bulk-coupon-codes.vercel.app',
+      customViewId: process.env.CUSTOM_VIEW_ID || 'cmgcec5c00004zb01rj11t0ge',
+      url: process.env.APPLICATION_URL || 'https://ct-bulk-coupon-codes.vercel.app',
     },
   },
   oAuthScopes: {
