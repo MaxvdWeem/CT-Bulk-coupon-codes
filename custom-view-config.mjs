@@ -26,7 +26,7 @@ const config = {
     csp: {
       'connect-src': ['https://edge.fullstory.com', 'https://fullstory.com'],
       'script-src': ['https://edge.fullstory.com', 'https://fullstory.com'],
-    },
+    }
   },
 };
 
