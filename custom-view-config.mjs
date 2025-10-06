@@ -24,7 +24,7 @@ const config = {
   locators: ['discounts.generate_discount_codes'],
     headers: {
     csp: {
-      'script-src': ['https://edge.fullstory.com/s/fs.js'],
+      'script-src': ['https://edge.fullstory.com', 'https://fullstory.com'],
     },
   },
 };
