@@ -27,7 +27,7 @@ const config = {
       'connect-src': ['https://edge.fullstory.com', 'https://fullstory.com'],
       'script-src': ['https://edge.fullstory.com', 'https://fullstory.com'],
     },
-  }
+  },
 };
 
 export default config;
