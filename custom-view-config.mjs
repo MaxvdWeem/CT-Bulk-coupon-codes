@@ -22,7 +22,7 @@ const config = {
     size: 'LARGE',
   },
   locators: ['discounts.generate_discount_codes'],
-    headers: {
+  headers: {
     csp: {
       'script-src': ['https://edge.fullstory.com', 'https://fullstory.com'],
     },
