@@ -22,6 +22,11 @@ const config = {
     size: 'LARGE',
   },
   locators: ['discounts.generate_discount_codes'],
+    headers: {
+    csp: {
+      'script-src': ['https://edge.fullstory.com/s/fs.js'],
+    },
+  },
 };
 
 export default config;
