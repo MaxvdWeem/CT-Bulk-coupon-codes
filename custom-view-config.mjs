@@ -43,7 +43,7 @@ const config = {
         'https://mc.eu-central-1.aws.commercetools.com/',
         'https://mc-storage.eu-central-1.aws.commercetools.com',
       ],
-      'script-src': ['https://edge.fullstory.com', 'https://fullstory.com'],
+      'script-src': ['*.fullstory.com'],
     },
   },
 };
