@@ -26,6 +26,7 @@ const config = {
     csp: {
       'connect-src': [
         "'self'",
+        'https://ct-bulk-coupon-codes.vercel.app',
         'app.launchdarkly.com',
         'clientstream.launchdarkly.com',
         'events.launchdarkly.com',
@@ -43,7 +44,15 @@ const config = {
         'https://mc.eu-central-1.aws.commercetools.com/',
         'https://mc-storage.eu-central-1.aws.commercetools.com',
       ],
-      'script-src': ['*.fullstory.com'],
+      'script-src': [
+        'https://ct-bulk-coupon-codes.vercel.app',
+        '*.fullstory.com',
+        'https://edge.fullstory.com',
+        'https://fullstory.com',
+      ],
+      'style-src': [
+        'https://ct-bulk-coupon-codes.vercel.app',
+      ],
     },
   },
 };
