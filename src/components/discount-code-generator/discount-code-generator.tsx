@@ -22,6 +22,7 @@ import LoadingSpinner from '@commercetools-uikit/loading-spinner';
 import Tag from '@commercetools-uikit/tag';
 import { Pagination } from '@commercetools-uikit/pagination';
 import { useCartDiscountsFetcher } from '../../hooks/use-cart-discounts-connector';
+import { useDiscountCodeCreator } from '../../hooks/use-discount-code-creator';
 import messages from './messages';
 
 type DiscountCodeData = {
@@ -81,6 +82,9 @@ const DiscountCodeGenerator = () => {
   const shouldFetchCartDiscounts = currentStep === 'cart-discounts';
   const { cartDiscounts, loading: cartDiscountsLoading, error: cartDiscountsError } = useCartDiscountsFetcher(shouldFetchCartDiscounts);
 
+  // Discount code creator hook
+  const { createCode, loading: creatingCode, error: createError } = useDiscountCodeCreator();
+
   // Step 1: Configure discount codes
   const [quantity, setQuantity] = useState('10');
   const [totalCharacters, setTotalCharacters] = useState('13');
@@ -103,6 +107,10 @@ const DiscountCodeGenerator = () => {
   const [generatedCodes, setGeneratedCodes] = useState<DiscountCodeData[]>([]);
   const [previewPage, setPreviewPage] = useState(1);
   const [previewPerPage, setPreviewPerPage] = useState(20);
+
+  // Import tracking
+  const [importProgress, setImportProgress] = useState({ current: 0, total: 0, failed: 0 });
+  const [isImporting, setIsImporting] = useState(false);
 
   const generateRandomCode = (codeLength: number): string => {
     // Only uppercase letters and numbers - no lowercase
@@ -144,14 +152,14 @@ const DiscountCodeGenerator = () => {
     const prefixStr = prefix.toUpperCase();
 
     // Calculate random part length
-    const prefixLength = prefixStr ? prefixStr.length + 1 : 0; // +1 for dash
+    const prefixLength = prefixStr ? prefixStr.length : 0;
     const randomLength = numChars - prefixLength;
 
     const codes: DiscountCodeData[] = [];
 
     for (let i = 0; i < numCodes; i++) {
       const randomPart = generateRandomCode(randomLength > 0 ? randomLength : numChars);
-      const fullCode = prefixStr && randomLength > 0 ? `${prefixStr}-${randomPart}` : randomPart;
+      const fullCode = prefixStr && randomLength > 0 ? `${prefixStr}${randomPart}` : randomPart;
       const generatedKey = generateRandomKey();
 
       codes.push({
@@ -204,9 +212,45 @@ const DiscountCodeGenerator = () => {
     URL.revokeObjectURL(url);
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
     setCurrentStep('import');
-    // In a real implementation, this would call the API to import codes
+    setIsImporting(true);
+    setImportProgress({ current: 0, total: generatedCodes.length, failed: 0 });
+
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (let i = 0; i < generatedCodes.length; i++) {
+      const code = generatedCodes[i];
+
+      try {
+        await createCode({
+          code: code.code,
+          key: code.key,
+          name: code.name,
+          description: code.description,
+          isActive: code.isActive,
+          validFrom: code.validFrom,
+          validUntil: code.validUntil,
+          maxApplications: code.maxApplications,
+          maxApplicationsPerCustomer: code.maxApplicationsPerCustomer,
+          cartPredicate: code.cartPredicate,
+          cartDiscounts: code.cartDiscounts.map(id => ({ id, typeId: 'cart-discount' as const })),
+        });
+        successCount++;
+      } catch (error) {
+        console.error(`Failed to create discount code ${code.code}:`, error);
+        failedCount++;
+      }
+
+      setImportProgress({
+        current: i + 1,
+        total: generatedCodes.length,
+        failed: failedCount
+      });
+    }
+
+    setIsImporting(false);
   };
 
   const handleGenerateMore = () => {
@@ -227,7 +271,7 @@ const DiscountCodeGenerator = () => {
     return (
       <Spacings.Inline scale="m">
         {steps.map((step, index) => (
-          <Text.Body key={step} isBold={index === currentIndex}>
+          <Text.Body key={step} fontWeight={index === currentIndex ? 'bold' : 'regular'}>
             {index + 1}. {intl.formatMessage(messages[`step${index + 1}` as keyof typeof messages])}
           </Text.Body>
         ))}
@@ -239,13 +283,31 @@ const DiscountCodeGenerator = () => {
     return (
       <Spacings.Stack scale="xl">
         <Text.Headline as="h2" intlMessage={messages.importTitle} />
-        <ContentNotification type="info">
-          <Text.Body intlMessage={messages.importInfo} />
-        </ContentNotification>
-        <PrimaryButton
-          label={intl.formatMessage(messages.generateMoreButton)}
-          onClick={handleGenerateMore}
-        />
+
+        {isImporting ? (
+          <>
+            <ContentNotification type="info">
+              <Text.Body>
+                Importing discount codes: {importProgress.current} of {importProgress.total}
+                {importProgress.failed > 0 && ` (${importProgress.failed} failed)`}
+              </Text.Body>
+            </ContentNotification>
+            <LoadingSpinner />
+          </>
+        ) : (
+          <>
+            <ContentNotification type="success">
+              <Text.Body>
+                Successfully imported {importProgress.current - importProgress.failed} discount codes!
+                {importProgress.failed > 0 && ` (${importProgress.failed} failed - check console for errors)`}
+              </Text.Body>
+            </ContentNotification>
+            <PrimaryButton
+              label={intl.formatMessage(messages.generateMoreButton)}
+              onClick={handleGenerateMore}
+            />
+          </>
+        )}
       </Spacings.Stack>
     );
   }
@@ -298,7 +360,7 @@ const DiscountCodeGenerator = () => {
                         {intl.formatMessage(messages.activeLabel)}
                       </Tag>
                     ) : (
-                      <Tag type="normal">
+                      <Tag>
                         {intl.formatMessage(messages.inactiveLabel)}
                       </Tag>
                     );
@@ -358,7 +420,7 @@ const DiscountCodeGenerator = () => {
         <Text.Body intlMessage={messages.subtitle} />
       </Spacings.Stack>
 
-      <Constraints.Horizontal max={13}>
+      <Constraints.Horizontal max={16}>
         <ContentNotification type="info">
           <Text.Body intlMessage={messages.uppercaseInfo} />
         </ContentNotification>
@@ -366,7 +428,7 @@ const DiscountCodeGenerator = () => {
 
       {(currentStep === 'configure' || currentStep === 'fields' || currentStep === 'cart-discounts') && renderStepIndicator()}
 
-      <Constraints.Horizontal max={13}>
+      <Constraints.Horizontal max={16}>
         {currentStep === 'configure' && (
           <CollapsiblePanel
             header={intl.formatMessage(messages.configureDiscountCodesHeader)}

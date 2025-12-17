@@ -1,0 +1,8 @@
+mutation CreateDiscountCode($draft: DiscountCodeDraft!) {
+  createDiscountCode(draft: $draft) {
+    id
+    code
+    key
+    isActive
+  }
+}
