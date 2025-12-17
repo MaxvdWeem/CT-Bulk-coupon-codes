@@ -43,6 +43,7 @@ export const useDiscountCodeCreator = () => {
     return await createDiscountCode({
       variables: { draft },
       context: {
+        target: GRAPHQL_TARGETS.COMMERCETOOLS_PLATFORM,
         headers: {
           'x-apollo-operation-name': 'CreateDiscountCode',
         },
