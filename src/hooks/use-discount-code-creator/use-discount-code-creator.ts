@@ -42,6 +42,11 @@ export const useDiscountCodeCreator = () => {
   const createCode = async (draft: TDiscountCodeDraft) => {
     return await createDiscountCode({
       variables: { draft },
+      context: {
+        headers: {
+          'x-apollo-operation-name': 'CreateDiscountCode',
+        },
+      },
     });
   };
 
