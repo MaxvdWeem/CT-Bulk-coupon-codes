@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useIntl } from 'react-intl';
 import { useCustomViewContext } from '@commercetools-frontend/application-shell-connectors';
 import { formatLocalizedString, transformLocalizedFieldToLocalizedString } from '@commercetools-frontend/l10n';
@@ -14,7 +14,6 @@ import { ContentNotification } from '@commercetools-uikit/notifications';
 import DataTable from '@commercetools-uikit/data-table';
 import Constraints from '@commercetools-uikit/constraints';
 import CollapsiblePanel from '@commercetools-uikit/collapsible-panel';
-import CheckboxInput from '@commercetools-uikit/checkbox-input';
 import RadioInput from '@commercetools-uikit/radio-input';
 import Grid from '@commercetools-uikit/grid';
 import DateTimeInput from '@commercetools-uikit/date-time-input';
@@ -26,10 +25,11 @@ import { useCartDiscountsFetcher } from '../../hooks/use-cart-discounts-connecto
 import messages from './messages';
 
 type DiscountCodeData = {
+  id: string; // Required for DataTable
   code: string;
   name?: Record<string, string>;
   description?: Record<string, string>;
-  key?: string;
+  key: string; // Required for CSV export
   isActive: boolean;
   validFrom?: string;
   validUntil?: string;
@@ -63,6 +63,18 @@ const DiscountCodeGenerator = () => {
       projectLanguages: context.project?.languages,
     })
   );
+
+  // Initialize empty localized strings for all project languages
+  const emptyLocalizedString = useMemo(() => {
+    const result: Record<string, string> = {};
+    if (projectLanguages) {
+      projectLanguages.forEach((lang) => {
+        result[lang] = '';
+      });
+    }
+    return result;
+  }, [projectLanguages]);
+
   const [currentStep, setCurrentStep] = useState<Step>('configure');
 
   // Fetch cart discounts - only when needed
@@ -75,8 +87,8 @@ const DiscountCodeGenerator = () => {
   const [prefix, setPrefix] = useState('');
 
   // Step 2: Discount code fields
-  const [codeName, setCodeName] = useState<Record<string, string>>({});
-  const [codeDescription, setCodeDescription] = useState<Record<string, string>>({});
+  const [codeName, setCodeName] = useState<Record<string, string>>(emptyLocalizedString);
+  const [codeDescription, setCodeDescription] = useState<Record<string, string>>(emptyLocalizedString);
   const [isActive, setIsActive] = useState(true);
   const [validFrom, setValidFrom] = useState('');
   const [validUntil, setValidUntil] = useState('');
@@ -140,12 +152,14 @@ const DiscountCodeGenerator = () => {
     for (let i = 0; i < numCodes; i++) {
       const randomPart = generateRandomCode(randomLength > 0 ? randomLength : numChars);
       const fullCode = prefixStr && randomLength > 0 ? `${prefixStr}-${randomPart}` : randomPart;
+      const generatedKey = generateRandomKey();
 
       codes.push({
+        id: generatedKey, // Use same value as key for DataTable identification
         code: fullCode,
         name: Object.keys(codeName).length > 0 ? codeName : undefined,
         description: Object.keys(codeDescription).length > 0 ? codeDescription : undefined,
-        key: generateRandomKey(),
+        key: generatedKey,
         isActive,
         validFrom: validFrom || undefined,
         validUntil: validUntil || undefined,
@@ -165,7 +179,7 @@ const DiscountCodeGenerator = () => {
     const headers = ['code', 'key', 'isActive', 'validFrom', 'validUntil', 'maxApplications', 'maxApplicationsPerCustomer', 'cartPredicate', 'cartDiscounts'];
     const rows = generatedCodes.map(code => [
       code.code,
-      code.key || '',
+      code.key,
       code.isActive ? 'true' : 'false',
       code.validFrom || '',
       code.validUntil || '',
@@ -277,7 +291,7 @@ const DiscountCodeGenerator = () => {
                       }
                     ) : '-';
                   case 'key':
-                    return item.key || '-';
+                    return item.key;
                   case 'status':
                     return item.isActive ? (
                       <Tag tone="primary">
@@ -350,7 +364,7 @@ const DiscountCodeGenerator = () => {
         </ContentNotification>
       </Constraints.Horizontal>
 
-      {currentStep !== 'import' && currentStep !== 'preview' && renderStepIndicator()}
+      {(currentStep === 'configure' || currentStep === 'fields' || currentStep === 'cart-discounts') && renderStepIndicator()}
 
       <Constraints.Horizontal max={13}>
         {currentStep === 'configure' && (
@@ -365,7 +379,6 @@ const DiscountCodeGenerator = () => {
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
                 isRequired
-                type="number"
               />
               <Grid
                 gridGap="16px"
@@ -378,7 +391,6 @@ const DiscountCodeGenerator = () => {
                     value={totalCharacters}
                     onChange={(e) => setTotalCharacters(e.target.value)}
                     isRequired
-                    type="number"
                   />
                 </Grid.Item>
                 <Grid.Item>
@@ -412,14 +424,30 @@ const DiscountCodeGenerator = () => {
               <LocalizedTextField
                 title={intl.formatMessage(messages.nameLabel)}
                 value={codeName}
-                onChange={(e) => setCodeName(e)}
-                selectedLanguage="en"
+                onChange={(event) => {
+                  // event.target has the language and the value for that specific language
+                  const language = (event.target as any).language;
+                  const value = event.target.value;
+                  setCodeName({
+                    ...codeName,
+                    [language]: value,
+                  });
+                }}
+                selectedLanguage={dataLocale || 'en'}
               />
               <LocalizedTextField
                 title={intl.formatMessage(messages.descriptionLabel)}
                 value={codeDescription}
-                onChange={(e) => setCodeDescription(e)}
-                selectedLanguage="en"
+                onChange={(event) => {
+                  // event.target has the language and the value for that specific language
+                  const language = (event.target as any).language;
+                  const value = event.target.value;
+                  setCodeDescription({
+                    ...codeDescription,
+                    [language]: value,
+                  });
+                }}
+                selectedLanguage={dataLocale || 'en'}
               />
               <Spacings.Stack scale="xs">
                 <FieldLabel title={intl.formatMessage(messages.statusLabel)} />
@@ -463,8 +491,6 @@ const DiscountCodeGenerator = () => {
                     title={intl.formatMessage(messages.maxApplicationsLabel)}
                     value={maxApplications}
                     onChange={(e) => setMaxApplications(e.target.value)}
-                    type="number"
-                    min="1"
                     isRequired
                   />
                 </Grid.Item>
@@ -473,8 +499,6 @@ const DiscountCodeGenerator = () => {
                     title={intl.formatMessage(messages.maxApplicationsPerCustomerLabel)}
                     value={maxApplicationsPerCustomer}
                     onChange={(e) => setMaxApplicationsPerCustomer(e.target.value)}
-                    type="number"
-                    min="1"
                     isRequired
                   />
                 </Grid.Item>
@@ -484,7 +508,6 @@ const DiscountCodeGenerator = () => {
                 description={intl.formatMessage(messages.cartPredicateDescription)}
                 value={cartPredicate}
                 onChange={(e) => setCartPredicate(e.target.value)}
-                isMultilineInput
               />
               <Spacings.Inline>
                 <SecondaryButton
@@ -519,7 +542,10 @@ const DiscountCodeGenerator = () => {
                     title={intl.formatMessage(messages.cartDiscountsLabel)}
                     description={intl.formatMessage(messages.cartDiscountsNote)}
                     value={selectedCartDiscounts[0] || ''}
-                    onChange={(e) => setSelectedCartDiscounts([e.target.value])}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setSelectedCartDiscounts(value ? [String(value)] : []);
+                    }}
                     options={[
                       { value: '', label: intl.formatMessage(messages.selectCartDiscount) },
                       { value: 'demo-discount-1', label: 'Demo Cart Discount 1' },
@@ -541,7 +567,10 @@ const DiscountCodeGenerator = () => {
                     title={intl.formatMessage(messages.cartDiscountsLabel)}
                     description={intl.formatMessage(messages.cartDiscountsNote)}
                     value={selectedCartDiscounts[0] || ''}
-                    onChange={(e) => setSelectedCartDiscounts([e.target.value])}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setSelectedCartDiscounts(value ? [String(value)] : []);
+                    }}
                     options={[
                       { value: '', label: intl.formatMessage(messages.selectCartDiscount) },
                       ...(cartDiscounts.length === 0
