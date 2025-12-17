@@ -42,13 +42,6 @@ export const useDiscountCodeCreator = () => {
   const createCode = async (draft: TDiscountCodeDraft) => {
     return await createDiscountCode({
       variables: { draft },
-      context: {
-        target: GRAPHQL_TARGETS.COMMERCETOOLS_PLATFORM,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-GraphQL-Operation-Name': 'CreateDiscountCode',
-        },
-      },
     });
   };
 
