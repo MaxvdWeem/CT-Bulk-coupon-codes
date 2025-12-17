@@ -45,7 +45,8 @@ export const useDiscountCodeCreator = () => {
       context: {
         target: GRAPHQL_TARGETS.COMMERCETOOLS_PLATFORM,
         headers: {
-          'x-apollo-operation-name': 'CreateDiscountCode',
+          'Content-Type': 'application/json',
+          'X-GraphQL-Operation-Name': 'CreateDiscountCode',
         },
       },
     });
