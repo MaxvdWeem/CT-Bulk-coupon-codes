@@ -223,12 +223,18 @@ const DiscountCodeGenerator = () => {
     for (let i = 0; i < generatedCodes.length; i++) {
       const code = generatedCodes[i];
 
+      // Helper function to check if a localized field has any non-empty values
+      const hasNonEmptyLocaleValues = (localizedField?: Record<string, string>) => {
+        if (!localizedField) return false;
+        return Object.values(localizedField).some(value => value && value.trim() !== '');
+      };
+
       try {
         await createCode({
           code: code.code,
           key: code.key,
-          name: code.name,
-          description: code.description,
+          name: hasNonEmptyLocaleValues(code.name) ? code.name : undefined,
+          description: hasNonEmptyLocaleValues(code.description) ? code.description : undefined,
           isActive: code.isActive,
           validFrom: code.validFrom,
           validUntil: code.validUntil,
