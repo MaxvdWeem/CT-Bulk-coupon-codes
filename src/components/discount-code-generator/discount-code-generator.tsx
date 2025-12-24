@@ -236,19 +236,36 @@ const DiscountCodeGenerator = () => {
       };
 
       try {
-        const payload = {
+        // Build payload, omitting undefined/empty fields
+        const payload: any = {
           code: code.code,
           key: code.key,
-          name: hasNonEmptyLocaleValues(code.name) ? code.name : undefined,
-          description: hasNonEmptyLocaleValues(code.description) ? code.description : undefined,
           isActive: code.isActive,
-          validFrom: code.validFrom,
-          validUntil: code.validUntil,
-          maxApplications: code.maxApplications,
-          maxApplicationsPerCustomer: code.maxApplicationsPerCustomer,
-          cartPredicate: code.cartPredicate,
           cartDiscounts: code.cartDiscounts.map(id => ({ id, typeId: 'cart-discount' as const })),
         };
+
+        // Only add optional fields if they have valid values
+        if (hasNonEmptyLocaleValues(code.name)) {
+          payload.name = code.name;
+        }
+        if (hasNonEmptyLocaleValues(code.description)) {
+          payload.description = code.description;
+        }
+        if (code.validFrom && code.validFrom.trim() !== '') {
+          payload.validFrom = code.validFrom;
+        }
+        if (code.validUntil && code.validUntil.trim() !== '') {
+          payload.validUntil = code.validUntil;
+        }
+        if (code.maxApplications !== undefined) {
+          payload.maxApplications = code.maxApplications;
+        }
+        if (code.maxApplicationsPerCustomer !== undefined) {
+          payload.maxApplicationsPerCustomer = code.maxApplicationsPerCustomer;
+        }
+        if (code.cartPredicate && code.cartPredicate.trim() !== '') {
+          payload.cartPredicate = code.cartPredicate;
+        }
 
         console.log('Creating discount code with payload:', JSON.stringify(payload, null, 2));
 
