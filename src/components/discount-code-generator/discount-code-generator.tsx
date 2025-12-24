@@ -146,6 +146,12 @@ const DiscountCodeGenerator = () => {
   };
 
   const handleStep3Continue = () => {
+    // Validate that at least one cart discount is selected
+    if (selectedCartDiscounts.length === 0) {
+      alert('Please select at least one cart discount. Discount codes require an associated cart discount to function.');
+      return;
+    }
+
     // Generate codes
     const numCodes = parseInt(quantity, 10);
     const numChars = parseInt(totalCharacters, 10);
@@ -230,7 +236,7 @@ const DiscountCodeGenerator = () => {
       };
 
       try {
-        await createCode({
+        const payload = {
           code: code.code,
           key: code.key,
           name: hasNonEmptyLocaleValues(code.name) ? code.name : undefined,
@@ -242,10 +248,19 @@ const DiscountCodeGenerator = () => {
           maxApplicationsPerCustomer: code.maxApplicationsPerCustomer,
           cartPredicate: code.cartPredicate,
           cartDiscounts: code.cartDiscounts.map(id => ({ id, typeId: 'cart-discount' as const })),
-        });
+        };
+
+        console.log('Creating discount code with payload:', JSON.stringify(payload, null, 2));
+
+        await createCode(payload);
         successCount++;
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Failed to create discount code ${code.code}:`, error);
+        console.error('Error details:', {
+          message: error.message,
+          graphQLErrors: error.graphQLErrors,
+          networkError: error.networkError,
+        });
         failedCount++;
       }
 
