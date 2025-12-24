@@ -235,6 +235,13 @@ const DiscountCodeGenerator = () => {
         return Object.values(localizedField).some(value => value && value.trim() !== '');
       };
 
+      // Helper function to convert localized object to GraphQL array format
+      const convertLocalizedFieldToArray = (localizedField: Record<string, string>) => {
+        return Object.keys(localizedField)
+          .filter((locale) => localizedField[locale] && localizedField[locale].trim() !== '')
+          .map((locale) => ({ locale, value: localizedField[locale] }));
+      };
+
       try {
         // Build payload, omitting undefined/empty fields
         const payload: any = {
@@ -245,11 +252,12 @@ const DiscountCodeGenerator = () => {
         };
 
         // Only add optional fields if they have valid values
+        // Convert localized fields from object format to array format for GraphQL
         if (hasNonEmptyLocaleValues(code.name)) {
-          payload.name = code.name;
+          payload.name = convertLocalizedFieldToArray(code.name!);
         }
         if (hasNonEmptyLocaleValues(code.description)) {
-          payload.description = code.description;
+          payload.description = convertLocalizedFieldToArray(code.description!);
         }
         if (code.validFrom && code.validFrom.trim() !== '') {
           payload.validFrom = code.validFrom;
