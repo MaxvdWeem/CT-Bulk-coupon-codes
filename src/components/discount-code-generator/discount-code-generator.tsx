@@ -22,7 +22,7 @@ import LoadingSpinner from '@commercetools-uikit/loading-spinner';
 import Tag from '@commercetools-uikit/tag';
 import { Pagination } from '@commercetools-uikit/pagination';
 import { useCartDiscountsFetcher } from '../../hooks/use-cart-discounts-connector';
-import { useDiscountCodeApi } from '../../hooks/use-discount-code-creator';
+import { useDiscountCodeCreator } from '../../hooks/use-discount-code-creator';
 import messages from './messages';
 
 type DiscountCodeData = {
@@ -83,7 +83,7 @@ const DiscountCodeGenerator = () => {
   const { cartDiscounts, loading: cartDiscountsLoading, error: cartDiscountsError } = useCartDiscountsFetcher(shouldFetchCartDiscounts);
 
   // Discount code creator hook
-  const { createCode } = useDiscountCodeApi();
+  const { createCode } = useDiscountCodeCreator();
 
   // Step 1: Configure discount codes
   const [quantity, setQuantity] = useState('10');
